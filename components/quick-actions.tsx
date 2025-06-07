@@ -1,9 +1,16 @@
+"use client"
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Stethoscope, Calendar, Phone, AlertTriangle, Heart } from "lucide-react"
 
+interface QuickActionsProps {
+  onActionClick: (action: string) => void
+}
+
 const quickActions = [
   {
+    id: "symptom-checker",
     title: "Symptom Checker",
     description: "AI-powered health assessment",
     icon: Stethoscope,
@@ -11,6 +18,7 @@ const quickActions = [
     urgent: false,
   },
   {
+    id: "book-appointment",
     title: "Book Appointment",
     description: "Schedule your visit",
     icon: Calendar,
@@ -18,6 +26,7 @@ const quickActions = [
     urgent: false,
   },
   {
+    id: "emergency",
     title: "Emergency",
     description: "Call 911 immediately",
     icon: AlertTriangle,
@@ -25,6 +34,7 @@ const quickActions = [
     urgent: true,
   },
   {
+    id: "telehealth",
     title: "Telehealth",
     description: "Virtual consultation",
     icon: Phone,
@@ -33,7 +43,7 @@ const quickActions = [
   },
 ]
 
-export function QuickActions() {
+export function QuickActions({ onActionClick }: QuickActionsProps) {
   return (
     <Card>
       <CardHeader>
@@ -45,11 +55,12 @@ export function QuickActions() {
       <CardContent className="grid grid-cols-2 gap-3">
         {quickActions.map((action) => (
           <Button
-            key={action.title}
+            key={action.id}
             variant="outline"
+            onClick={() => onActionClick(action.id)}
             className={`h-auto p-4 flex flex-col items-center gap-2 text-white border-0 ${action.color} ${
               action.urgent ? "animate-pulse" : ""
-            }`}
+            } transition-all duration-200 hover:scale-105`}
           >
             <action.icon className="w-6 h-6" />
             <div className="text-center">
