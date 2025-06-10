@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
@@ -31,31 +31,35 @@ export function QueueManagement({ userId }: QueueManagementProps) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetchQueueEntries()
+    if (userId) {
+      fetchQueueEntries()
 
-    // Set up real-time subscription
-    const subscription = supabase
-      .channel("queue_updates")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "queue_entries",
-          filter: `user_id=eq.${userId}`,
-        },
-        () => {
-          fetchQueueEntries()
-        },
-      )
-      .subscribe()
+      // Set up real-time subscription
+      const subscription = supabase
+        .channel("queue_updates")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "queue_entries",
+            filter: `user_id=eq.${userId}`,
+          },
+          () => {
+            fetchQueueEntries()
+          },
+        )
+        .subscribe()
 
-    return () => {
-      subscription.unsubscribe()
+      return () => {
+        subscription.unsubscribe()
+      }
     }
   }, [userId])
 
   const fetchQueueEntries = async () => {
+    if (!userId) return
+
     try {
       const { data, error } = await supabase
         .from("queue_entries")
@@ -104,28 +108,24 @@ export function QueueManagement({ userId }: QueueManagementProps) {
     }
   }
 
-  const generateCheckInCode = () => {
-    return Math.random().toString(36).substring(2, 8).toUpperCase()
-  }
-
   const getStatusColor = (status: string) => {
     switch (status) {
       case "waiting":
-        return "bg-yellow-100 text-yellow-700 border-yellow-200"
+        return "border-yellow-200 bg-yellow-50 text-yellow-700"
       case "called":
-        return "bg-blue-100 text-blue-700 border-blue-200"
+        return "border-blue-200 bg-blue-50 text-blue-700"
       case "checked_in":
-        return "bg-green-100 text-green-700 border-green-200"
+        return "border-green-200 bg-green-50 text-green-700"
       default:
-        return "bg-gray-100 text-gray-700 border-gray-200"
+        return "border-slate-200 bg-slate-50 text-slate-700"
     }
   }
 
   const getSeverityColor = (severity: number) => {
-    if (severity >= 4) return "bg-red-100 text-red-700"
-    if (severity >= 3) return "bg-orange-100 text-orange-700"
-    if (severity >= 2) return "bg-yellow-100 text-yellow-700"
-    return "bg-green-100 text-green-700"
+    if (severity >= 4) return "border-red-200 bg-red-50 text-red-700"
+    if (severity >= 3) return "border-orange-200 bg-orange-50 text-orange-700"
+    if (severity >= 2) return "border-yellow-200 bg-yellow-50 text-yellow-700"
+    return "border-green-200 bg-green-50 text-green-700"
   }
 
   const formatTimeRemaining = (deadline: string) => {
@@ -147,10 +147,14 @@ export function QueueManagement({ userId }: QueueManagementProps) {
   if (loading) {
     return (
       <Card>
+        <CardHeader>
+          <CardTitle>Your Queue Status</CardTitle>
+          <CardDescription>Track your position in hospital queues</CardDescription>
+        </CardHeader>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-            <div className="h-20 bg-gray-200 rounded"></div>
+            <div className="h-4 bg-slate-200 rounded w-1/4"></div>
+            <div className="h-20 bg-slate-200 rounded"></div>
           </div>
         </CardContent>
       </Card>
@@ -165,12 +169,18 @@ export function QueueManagement({ userId }: QueueManagementProps) {
             <Clock className="w-5 h-5 text-emerald-600" />
             Your Queue Status
           </CardTitle>
+          <CardDescription>Track your position in hospital queues</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="text-center py-8">
-            <Clock className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <p className="text-gray-600">No active queue entries</p>
-            <p className="text-sm text-gray-500 mt-2">Use the AI assistant to assess your injury and join a queue</p>
+          <div className="text-center py-12 border border-dashed border-slate-200 rounded-lg">
+            <Clock className="w-12 h-12 text-slate-300 mx-auto mb-4" />
+            <p className="text-slate-600 font-medium">No active queue entries</p>
+            <p className="text-sm text-slate-500 mt-2 max-w-md mx-auto">
+              Use the AI assistant to assess your injury and join a queue at a nearby hospital
+            </p>
+            <Button variant="outline" className="mt-6">
+              Start Assessment
+            </Button>
           </div>
         </CardContent>
       </Card>
@@ -184,10 +194,11 @@ export function QueueManagement({ userId }: QueueManagementProps) {
           <Clock className="w-5 h-5 text-emerald-600" />
           Your Queue Status
         </CardTitle>
+        <CardDescription>Track your position in hospital queues</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         {queueEntries.map((entry) => (
-          <div key={entry.id} className="p-4 border rounded-lg bg-white">
+          <div key={entry.id} className="p-4 border rounded-lg bg-white shadow-sm">
             <div className="flex items-start justify-between mb-3">
               <div className="flex-1">
                 <h4 className="font-medium text-slate-900">{entry.hospital_name}</h4>
@@ -197,8 +208,12 @@ export function QueueManagement({ userId }: QueueManagementProps) {
                 </div>
               </div>
               <div className="flex gap-2">
-                <Badge className={getStatusColor(entry.status)}>{entry.status.replace("_", " ")}</Badge>
-                <Badge className={getSeverityColor(entry.severity_level)}>Level {entry.severity_level}</Badge>
+                <Badge variant="outline" className={getStatusColor(entry.status)}>
+                  {entry.status.replace("_", " ")}
+                </Badge>
+                <Badge variant="outline" className={getSeverityColor(entry.severity_level)}>
+                  Level {entry.severity_level}
+                </Badge>
               </div>
             </div>
 
@@ -223,7 +238,7 @@ export function QueueManagement({ userId }: QueueManagementProps) {
             </div>
 
             {entry.status === "called" && (
-              <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
+              <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
                 <p className="text-sm text-blue-800 mb-3">
                   <strong>You've been called!</strong> Please check in at the hospital within the time limit.
                 </p>
@@ -232,19 +247,19 @@ export function QueueManagement({ userId }: QueueManagementProps) {
                     placeholder="Enter check-in code"
                     value={checkInCode}
                     onChange={(e) => setCheckInCode(e.target.value.toUpperCase())}
-                    className="flex-1 h-8"
+                    className="flex-1 h-9"
                   />
-                  <Button onClick={() => handleCheckIn(entry.id)} size="sm" className="h-8" disabled={!checkInCode}>
+                  <Button onClick={() => handleCheckIn(entry.id)} size="sm" className="h-9" disabled={!checkInCode}>
                     <CheckCircle className="w-3 h-3 mr-1" />
                     Check In
                   </Button>
                 </div>
                 <div className="flex gap-2 mt-2">
-                  <Button variant="outline" size="sm" className="flex-1 h-8">
+                  <Button variant="outline" size="sm" className="flex-1 h-9">
                     <Navigation className="w-3 h-3 mr-1" />
                     Directions
                   </Button>
-                  <Button variant="outline" size="sm" className="flex-1 h-8">
+                  <Button variant="outline" size="sm" className="flex-1 h-9">
                     <Phone className="w-3 h-3 mr-1" />
                     Call Hospital
                   </Button>
@@ -253,7 +268,7 @@ export function QueueManagement({ userId }: QueueManagementProps) {
             )}
 
             {entry.status === "waiting" && (
-              <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
+              <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
                 <p className="text-sm text-yellow-800">
                   <strong>In Queue:</strong> You'll receive a notification when it's your turn. Make sure to arrive
                   within 15 minutes of being called.

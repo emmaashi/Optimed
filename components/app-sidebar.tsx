@@ -1,3 +1,6 @@
+"use client"
+
+import { useRouter } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -11,12 +14,15 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { MapPin, Clock, Stethoscope, Calendar, User, Settings, Heart, FileText, Phone, Shield } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { MapPin, Clock, Stethoscope, Calendar, Settings, Heart, FileText, Phone, Shield, LogOut } from "lucide-react"
+import { useAuth } from "@/components/auth-provider"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 
 const navigationItems = [
   {
     title: "Dashboard",
-    url: "#",
+    url: "/dashboard",
     icon: MapPin,
     isActive: true,
   },
@@ -66,6 +72,28 @@ const supportItems = [
 ]
 
 export function AppSidebar() {
+  const { user, signOut } = useAuth()
+  const router = useRouter()
+
+  const handleSignOut = async () => {
+    await signOut()
+    router.push("/auth/login")
+  }
+
+  // Get user's name from metadata or email
+  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User"
+  const userEmail = user?.email || ""
+
+  // Get initials for avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(" ")
+      .map((part) => part[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2)
+  }
+
   return (
     <Sidebar className="border-r border-slate-200">
       <SidebarHeader className="p-6">
@@ -121,14 +149,22 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-6">
-        <div className="flex items-center gap-3 p-3 bg-slate-100 rounded-lg">
-          <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
-            <User className="w-4 h-4 text-slate-600" />
+        <div className="space-y-3">
+          <div className="flex items-center gap-3 p-3 bg-slate-100 rounded-lg">
+            <Avatar className="h-9 w-9 border border-slate-200">
+              <AvatarFallback className="bg-emerald-100 text-emerald-700 font-medium">
+                {getInitials(userName)}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-slate-900 truncate">{userName}</p>
+              <p className="text-xs text-slate-500 truncate">{userEmail}</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium text-slate-900 truncate">John Doe</p>
-            <p className="text-xs text-slate-500">Patient ID: #12345</p>
-          </div>
+          <Button onClick={handleSignOut} variant="outline" size="sm" className="w-full justify-start">
+            <LogOut className="w-4 h-4 mr-2" />
+            Sign Out
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
