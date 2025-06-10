@@ -28,6 +28,7 @@ export async function POST(req: Request) {
 2. Provide appropriate care recommendations
 3. Help users understand when to seek emergency vs. routine care
 4. Guide them to the right healthcare facility
+5. Give an estimate of waittime at specific hospitals/ERs
 
 IMPORTANT: You are NOT providing medical diagnosis, only triage guidance.
 
@@ -60,7 +61,6 @@ Be empathetic, clear, and always emphasize that this is guidance only.`,
 
     const response = result.toDataStreamResponse()
 
-    // Add CORS headers if needed
     response.headers.set("Access-Control-Allow-Origin", "*")
     response.headers.set("Access-Control-Allow-Methods", "POST")
     response.headers.set("Access-Control-Allow-Headers", "Content-Type")

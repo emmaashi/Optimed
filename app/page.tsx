@@ -35,7 +35,7 @@ export default function Dashboard() {
     try {
       const checkInCode = Math.random().toString(36).substring(2, 8).toUpperCase()
       const checkInDeadline = new Date()
-      checkInDeadline.setHours(checkInDeadline.getHours() + 2) // 2 hour window
+      checkInDeadline.setHours(checkInDeadline.getHours() + 2) 
 
       const { data, error } = await supabase.from("queue_entries").insert({
         user_id: currentUser.id,
