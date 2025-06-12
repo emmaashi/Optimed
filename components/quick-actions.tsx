@@ -45,30 +45,32 @@ const quickActions = [
 
 export function QuickActions({ onActionClick }: QuickActionsProps) {
   return (
-    <Card>
-      <CardHeader>
+    <Card className="border-none shadow-sm">
+      <CardHeader className="pb-2">
         <CardTitle className="flex items-center gap-2 text-lg">
-          <Heart className="w-5 h-5 text-emerald-600" />
+          <Heart className="w-5 h-5 text-emerald-500" />
           Quick Actions
         </CardTitle>
       </CardHeader>
-      <CardContent className="grid grid-cols-2 gap-3">
-        {quickActions.map((action) => (
-          <Button
-            key={action.id}
-            variant="outline"
-            onClick={() => onActionClick(action.id)}
-            className={`h-auto p-4 flex flex-col items-center gap-2 text-white border-0 ${action.color} ${
-              action.urgent ? "animate-pulse" : ""
-            } transition-all duration-200 hover:scale-105`}
-          >
-            <action.icon className="w-6 h-6" />
-            <div className="text-center">
-              <div className="font-medium text-sm">{action.title}</div>
-              <div className="text-xs opacity-90">{action.description}</div>
-            </div>
-          </Button>
-        ))}
+      <CardContent>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {quickActions.map((action) => (
+            <Button
+              key={action.id}
+              variant="outline"
+              onClick={() => onActionClick(action.id)}
+              className={`h-auto py-4 flex flex-col items-center gap-2 text-white border-0 ${action.color} ${
+                action.urgent ? "animate-pulse" : ""
+              } transition-all duration-200 hover:scale-105 shadow-sm`}
+            >
+              <action.icon className="w-6 h-6" />
+              <div className="text-center">
+                <div className="font-medium text-sm">{action.title}</div>
+                <div className="text-xs opacity-90">{action.description}</div>
+              </div>
+            </Button>
+          ))}
+        </div>
       </CardContent>
     </Card>
   )

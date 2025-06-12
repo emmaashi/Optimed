@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import {
   Sidebar,
   SidebarContent,
@@ -15,40 +14,51 @@ import {
   SidebarSeparator,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { MapPin, Clock, Stethoscope, Calendar, Settings, Heart, FileText, Phone, Shield, LogOut } from "lucide-react"
+import {
+  MapPin,
+  Clock,
+  Stethoscope,
+  Calendar,
+  User,
+  Settings,
+  Heart,
+  FileText,
+  Phone,
+  Shield,
+  LogOut,
+} from "lucide-react"
 import { useAuth } from "@/components/auth-provider"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { useRouter, usePathname } from "next/navigation"
 
 const navigationItems = [
   {
     title: "Dashboard",
     url: "/dashboard",
     icon: MapPin,
-    isActive: true,
   },
   {
     title: "Wait Times",
-    url: "#",
+    url: "/wait-times",
     icon: Clock,
   },
   {
     title: "Symptom Checker",
-    url: "#",
+    url: "/symptom-checker",
     icon: Stethoscope,
   },
   {
     title: "Appointments",
-    url: "#",
+    url: "/appointments",
     icon: Calendar,
   },
   {
     title: "Medical Records",
-    url: "#",
+    url: "/medical-records",
     icon: FileText,
   },
   {
     title: "Health Insights",
-    url: "#",
+    url: "/health-insights",
     icon: Heart,
   },
 ]
@@ -56,17 +66,17 @@ const navigationItems = [
 const supportItems = [
   {
     title: "Emergency Contacts",
-    url: "#",
+    url: "/emergency-contacts",
     icon: Phone,
   },
   {
     title: "Privacy & Security",
-    url: "#",
+    url: "/privacy-security",
     icon: Shield,
   },
   {
     title: "Settings",
-    url: "#",
+    url: "/settings",
     icon: Settings,
   },
 ]
@@ -74,25 +84,16 @@ const supportItems = [
 export function AppSidebar() {
   const { user, signOut } = useAuth()
   const router = useRouter()
+  const pathname = usePathname()
 
   const handleSignOut = async () => {
     await signOut()
-    router.push("/auth/login")
+    router.push("/login")
   }
 
-  // Get user's name from metadata or email
-  const userName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User"
-  const userEmail = user?.email || ""
-
-  // Get initials for avatar
-  const getInitials = (name: string) => {
-    return name
-      .split(" ")
-      .map((part) => part[0])
-      .join("")
-      .toUpperCase()
-      .substring(0, 2)
-  }
+  // Get display name from user metadata or email
+  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "User"
+  const healthCardNumber = user?.user_metadata?.health_card_number
 
   return (
     <Sidebar className="border-r border-slate-200">
@@ -113,16 +114,19 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild isActive={item.isActive}>
-                    <a href={item.url} className="flex items-center gap-3">
-                      <item.icon className="w-4 h-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navigationItems.map((item) => {
+                const isActive = pathname === item.url
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <SidebarMenuButton asChild isActive={isActive}>
+                      <a href={item.url} className="flex items-center gap-3">
+                        <item.icon className="w-4 h-4" />
+                        <span>{item.title}</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                )
+              })}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -151,17 +155,16 @@ export function AppSidebar() {
       <SidebarFooter className="p-6">
         <div className="space-y-3">
           <div className="flex items-center gap-3 p-3 bg-slate-100 rounded-lg">
-            <Avatar className="h-9 w-9 border border-slate-200">
-              <AvatarFallback className="bg-emerald-100 text-emerald-700 font-medium">
-                {getInitials(userName)}
-              </AvatarFallback>
-            </Avatar>
+            <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
+              <User className="w-4 h-4 text-slate-600" />
+            </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">{userName}</p>
-              <p className="text-xs text-slate-500 truncate">{userEmail}</p>
+              <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
+              <p className="text-xs text-slate-500">{healthCardNumber ? `HC: ${healthCardNumber}` : "No HC on file"}</p>
             </div>
           </div>
-          <Button onClick={handleSignOut} variant="outline" size="sm" className="w-full justify-start">
+
+          <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full justify-start">
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>
