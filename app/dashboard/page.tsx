@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { SidebarProvider } from "@/components/ui/sidebar"
 import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
-import { WaitTimesCard } from "@/components/wait-times-card"
 import { HospitalMap } from "@/components/hospital-map"
 import { QuickActions } from "@/components/quick-actions"
 import { EmergencyBanner } from "@/components/emergency-banner"
@@ -17,59 +16,32 @@ import { ProtectedRoute } from "@/components/protected-route"
 import { useAuth } from "@/components/auth-provider"
 import { supabase } from "@/lib/supabase"
 
-export default function Dashboard() {
-  const { user } = useAuth() // Remove loading from here since ProtectedRoute handles it
+function DashboardContent() {
+  const { user } = useAuth()
   const [selectedHospital, setSelectedHospital] = useState<string | null>(null)
-  const [currentUser, setCurrentUser] = useState<any>(null)
   const [activeModal, setActiveModal] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (user) {
-      // Get current user profile from our users table
-      const getCurrentUser = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("users")
-            .select("*")
-            .eq("id", user.id)
-            .single()
-          
-          if (error) {
-            console.error('Error fetching user:', error)
-            return
-          }
-          
-          setCurrentUser(data)
-        } catch (error) {
-          console.error('Error in getCurrentUser:', error)
-        }
-      }
-      getCurrentUser()
-    }
-  }, [user])
-
   const handleQueueJoin = async (assessment: any, hospitalId: string) => {
-    if (!currentUser) return
+    if (!user) return
 
     try {
       const checkInCode = Math.random().toString(36).substring(2, 8).toUpperCase()
       const checkInDeadline = new Date()
-      checkInDeadline.setHours(checkInDeadline.getHours() + 2) // 2 hour window
+      checkInDeadline.setHours(checkInDeadline.getHours() + 2)
 
       const { data, error } = await supabase.from("queue_entries").insert({
-        user_id: currentUser.id,
+        user_id: user.id,
         hospital_id: hospitalId,
         injury_description: assessment.recommendedAction,
         severity_level: assessment.severity,
         estimated_wait_time: assessment.estimatedWaitTime,
-        position_in_queue: Math.floor(Math.random() * 10) + 1, // Simulated
+        position_in_queue: Math.floor(Math.random() * 10) + 1,
         check_in_code: checkInCode,
         check_in_deadline: checkInDeadline.toISOString(),
         status: "waiting",
       })
 
       if (error) throw error
-
       alert(`Successfully joined queue! Your check-in code is: ${checkInCode}`)
     } catch (error) {
       console.error("Error joining queue:", error)
@@ -97,39 +69,49 @@ export default function Dashboard() {
   }
 
   return (
-    <ProtectedRoute>
-      <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full bg-slate-50">
-          <AppSidebar />
-          <main className="flex-1 flex flex-col">
-            <DashboardHeader />
-            <div className="flex-1 p-6 space-y-6">
-              <EmergencyBanner />
+    <SidebarProvider defaultOpen={true}>
+      <div className="flex min-h-screen w-full bg-slate-50">
+        <AppSidebar />
+        <main className="flex-1 flex flex-col">
+          <DashboardHeader />
 
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Main Map Section */}
-                <div className="lg:col-span-2">
-                  <HospitalMap selectedHospital={selectedHospital} onHospitalSelect={setSelectedHospital} />
-                </div>
+          <div className="flex-1 p-4 md:p-6 overflow-auto">
+            {/* <EmergencyBanner className="mb-4" /> */}
 
-                {/* Wait Times Sidebar */}
-                <div className="space-y-6">
-                  <WaitTimesCard selectedHospital={selectedHospital} />
-                  <QuickActions onActionClick={handleQuickAction} />
-                </div>
-              </div>
-
-              <QueueManagement userId={currentUser?.id} />
+            {/* Quick Actions - Top Row */}
+            <div className="mb-4 md:mb-6">
+              <QuickActions onActionClick={handleQuickAction} />
             </div>
 
-            {currentUser && <AIChatbot userId={currentUser.id} onQueueJoin={handleQueueJoin} />}
+            {/* Main Content - Two Column Layout */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+              {/* Left Column - Map */}
+              <div className="h-[400px] lg:h-[600px]">
+                <HospitalMap selectedHospital={selectedHospital} onHospitalSelect={setSelectedHospital} />
+              </div>
 
-            {activeModal === "symptom-checker" && <SymptomChecker onClose={() => setActiveModal(null)} />}
-            {activeModal === "appointment-booking" && <AppointmentBooking onClose={() => setActiveModal(null)} />}
-            {activeModal === "telehealth" && <TelehealthModal onClose={() => setActiveModal(null)} />}
-          </main>
-        </div>
-      </SidebarProvider>
+              {/* Right Column - Queue Management */}
+              <div className="h-[400px] lg:h-[600px] overflow-auto">
+                <QueueManagement userId={user?.id} />
+              </div>
+            </div>
+          </div>
+
+          {user && <AIChatbot userId={user.id} onQueueJoin={handleQueueJoin} />}
+
+          {activeModal === "symptom-checker" && <SymptomChecker onClose={() => setActiveModal(null)} />}
+          {activeModal === "appointment-booking" && <AppointmentBooking onClose={() => setActiveModal(null)} />}
+          {activeModal === "telehealth" && <TelehealthModal onClose={() => setActiveModal(null)} />}
+        </main>
+      </div>
+    </SidebarProvider>
+  )
+}
+
+export default function DashboardPage() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
     </ProtectedRoute>
   )
 }
