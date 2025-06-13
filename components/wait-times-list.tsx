@@ -131,8 +131,6 @@ export function WaitTimesList({ onJoinQueue, activeQueueId }: WaitTimesListProps
   return (
     <div className="space-y-4">
       {/* Search and Filter */}
-      <Card>
-        <CardContent className="p-4">
           <div className="flex gap-4">
             <div className="flex-1 relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
@@ -162,8 +160,6 @@ export function WaitTimesList({ onJoinQueue, activeQueueId }: WaitTimesListProps
               </Button>
             </div>
           </div>
-        </CardContent>
-      </Card>
 
       {/* Hospital List */}
       <div className="space-y-3">
