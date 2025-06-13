@@ -80,7 +80,7 @@ function DashboardContent() {
           <DashboardHeader />
 
           <div className="flex-1 p-4 md:p-6 overflow-auto">
-            <EmergencyBanner className="mb-4" />
+            {/* <EmergencyBanner className="mb-4" /> */}
 
             <div className="mb-4 md:mb-6">
               <QuickActions onActionClick={handleQuickAction} />
