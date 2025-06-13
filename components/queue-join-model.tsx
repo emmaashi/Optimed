@@ -172,10 +172,6 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Join Queue at {hospital?.name}</DialogTitle>
-          <div className="text-xs text-gray-500 mt-1">
-            Debug: {hospital ? `ID: ${hospital.id}, Name: ${hospital.name}` : "No hospital data"} | UUID:{" "}
-            {hospitalId || "Not found"}
-          </div>
         </DialogHeader>
 
         {success ? (

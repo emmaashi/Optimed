@@ -83,7 +83,7 @@ export function ActiveQueueCard({ queue, onUpdate }: ActiveQueueCardProps) {
 
   return (
     <Card className={`${isExpiringSoon ? "border-amber-300 bg-amber-50" : ""}`}>
-      <CardHeader className="pb-3">
+      <CardHeader>
         <CardTitle className="flex items-center gap-2 text-lg">
           <Clock className="w-5 h-5 text-emerald-500" />
           Queue Status
