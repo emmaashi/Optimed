@@ -8,13 +8,12 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, Save, Heart, User, AlertCircle, UserPlus, Calendar } from "lucide-react"
-import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/app/contexts/auth-provider"
 import { ProtectedRoute } from "@/components/protected-route"
-import { supabase } from "@/lib/supabase"
 import type React from "react"
 
 function ProfileContent() {
-  const { user, updateProfile } = useAuth()
+  const { user, userProfile, error: authError, updateProfile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [error, setError] = useState("")
@@ -37,30 +36,30 @@ function ProfileContent() {
 
       try {
         setLoading(true)
-        const { data, error } = await supabase.from("users").select("*").eq("id", user.id).single()
 
-        if (error) throw error
-
-        if (data) {
+        if (userProfile) {
+          // Use the userProfile from AuthProvider if available
           setFormData({
-            full_name: data.full_name || "",
-            email: data.email || user.email || "",
-            phone: data.phone || "",
-            date_of_birth: data.date_of_birth || "",
-            health_card_number: data.health_card_number || "",
-            emergency_contact_name: data.emergency_contact_name || "",
-            emergency_contact_phone: data.emergency_contact_phone || "",
-            medical_conditions: Array.isArray(data.medical_conditions)
-              ? data.medical_conditions.join(", ")
-              : data.medical_conditions || "",
-            allergies: Array.isArray(data.allergies) ? data.allergies.join(", ") : data.allergies || "",
-            current_medications: Array.isArray(data.current_medications)
-              ? data.current_medications.join(", ")
-              : data.current_medications || "",
+            full_name: userProfile.full_name || "",
+            email: userProfile.email || user.email || "",
+            phone: userProfile.phone || "",
+            date_of_birth: userProfile.date_of_birth || "",
+            health_card_number: userProfile.health_card_number || "",
+            emergency_contact_name: userProfile.emergency_contact_name || "",
+            emergency_contact_phone: userProfile.emergency_contact_phone || "",
+            medical_conditions: Array.isArray(userProfile.medical_conditions)
+              ? userProfile.medical_conditions.join(", ")
+              : userProfile.medical_conditions || "",
+            allergies: Array.isArray(userProfile.allergies)
+              ? userProfile.allergies.join(", ")
+              : userProfile.allergies || "",
+            current_medications: Array.isArray(userProfile.current_medications)
+              ? userProfile.current_medications.join(", ")
+              : userProfile.current_medications || "",
           })
         }
-      } catch (err) {
-        console.error("Error fetching user profile:", err)
+      } catch (err: any) {
+        console.error("Error setting up profile form:", err)
         setError("Failed to load profile data. Please try again.")
       } finally {
         setLoading(false)
@@ -68,7 +67,7 @@ function ProfileContent() {
     }
 
     fetchUserProfile()
-  }, [user])
+  }, [user, userProfile])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -77,7 +76,7 @@ function ProfileContent() {
     })
   }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError("")
@@ -109,7 +108,7 @@ function ProfileContent() {
 
       setSaveSuccess(true)
       setTimeout(() => setSaveSuccess(false), 3000)
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error updating profile:", err)
       setError(err.message || "Failed to update profile. Please try again.")
     } finally {

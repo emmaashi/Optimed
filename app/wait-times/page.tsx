@@ -8,7 +8,7 @@ import { WaitTimesList } from "@/components/wait-times-list"
 import { QueueJoinModal } from "@/components/queue-join-model"
 import { ActiveQueueCard } from "@/components/active-queue-entries"
 import { ProtectedRoute } from "@/components/protected-route"
-import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/app/contexts/auth-provider"
 import { supabase } from "@/lib/supabase"
 
 export default function WaitTimesPage() {

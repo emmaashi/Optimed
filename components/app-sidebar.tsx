@@ -27,7 +27,7 @@ import {
   Shield,
   LogOut,
 } from "lucide-react"
-import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/app/contexts/auth-provider"
 import { useRouter, usePathname } from "next/navigation"
 
 const navigationItems = [

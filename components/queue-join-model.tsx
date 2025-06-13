@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,9 +9,10 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "./ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Badge } from "@/components/ui/badge"
-import { Clock, MapPin, AlertCircle } from "lucide-react"
+import { Clock, MapPin, AlertCircle, Loader2, CheckCircle } from 'lucide-react'
 import { supabase } from "@/lib/supabase"
-import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/app/contexts/auth-provider"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 
 interface QueueJoinModalProps {
   hospital: any
@@ -35,52 +36,105 @@ const injuryTypes = [
 ]
 
 export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilledInjury }: QueueJoinModalProps) {
-  const { user } = useAuth()
+  const { user, userProfile } = useAuth()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState("")
+  const [success, setSuccess] = useState(false)
+  const [checkInCode, setCheckInCode] = useState("")
+  const [hospitalId, setHospitalId] = useState<string | null>(null)
   const [formData, setFormData] = useState({
-    fullName: user?.user_metadata?.full_name || user?.email?.split("@")[0] || "",
-    healthCardNumber: "",
-    phoneNumber: user?.user_metadata?.phone || "",
+    fullName: userProfile?.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "",
+    healthCardNumber: userProfile?.health_card_number || "",
+    phoneNumber: userProfile?.phone || user?.user_metadata?.phone || "",
     injuryType: prefilledInjury || "",
     injuryDescription: "",
     severity: 2,
   })
 
+  // Fetch the actual UUID for the hospital when component mounts
+  useEffect(() => {
+    const fetchHospitalId = async () => {
+      if (!hospital?.name) return
+
+      try {
+        console.log("Fetching hospital ID for:", hospital.name)
+        
+        const { data, error } = await supabase
+          .from("hospital_reference") // Use the hospital_reference view
+          .select("id")
+          .ilike("name", `%${hospital.name.replace(/'/g, "''")}%`)
+          .single()
+
+        if (error) {
+          console.error("Error fetching hospital ID:", error)
+          return
+        }
+
+        if (data) {
+          setHospitalId(data.id)
+          console.log("Found hospital ID:", data.id)
+        } else {
+          console.error("No hospital found with name:", hospital.name)
+        }
+      } catch (err) {
+        console.error("Error in fetchHospitalId:", err)
+      }
+    }
+
+    fetchHospitalId()
+  }, [hospital])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError("")
 
     try {
+      if (!user?.id) {
+        throw new Error("User not authenticated")
+      }
+
+      if (!hospitalId) {
+        console.error("Hospital ID is missing for:", hospital?.name)
+        throw new Error("Hospital information is missing. Please try again.")
+      }
+
       const checkInCode = Math.random().toString(36).substring(2, 8).toUpperCase()
-      const estimatedWaitTime = hospital.waitTime + Math.floor(Math.random() * 20) - 10
+      const estimatedWaitTime = hospital.wait_time || 30 // Default to 30 if wait_time is not provided
       const position = Math.floor(Math.random() * 10) + 1
 
       const checkInDeadline = new Date()
       checkInDeadline.setMinutes(checkInDeadline.getMinutes() + estimatedWaitTime + 15)
 
-      const { error } = await supabase.from("queue_entries").insert({
-        user_id: user?.id,
-        hospital_id: hospital.id,
-        full_name: formData.fullName,
-        health_card_number: formData.healthCardNumber,
-        phone_number: formData.phoneNumber,
-        injury_type: formData.injuryType,
-        injury_description: formData.injuryDescription,
+      // Use the fetched UUID for hospital_id
+      const queueEntry = {
+        user_id: user.id,
+        hospital_id: hospitalId, // Use the UUID from hospital_reference
+        injury_description: `${formData.injuryType}: ${formData.injuryDescription}`,
         severity_level: formData.severity,
         estimated_wait_time: estimatedWaitTime,
         position_in_queue: position,
+        status: "waiting",
         check_in_code: checkInCode,
         check_in_deadline: checkInDeadline.toISOString(),
-        status: "waiting",
-      })
+      }
 
-      if (error) throw error
+      console.log("Submitting queue entry:", queueEntry)
 
-      alert(`Successfully joined queue! Your check-in code is: ${checkInCode}`)
-      onSuccess()
-    } catch (error) {
-      console.error("Error joining queue:", error)
-      alert("Failed to join queue. Please try again.")
+      // Insert the queue entry
+      const { data, error } = await supabase.from("queue_entries").insert(queueEntry).select()
+
+      if (error) {
+        console.error("Supabase error:", error)
+        throw new Error(error.message)
+      }
+
+      console.log("Queue entry created:", data)
+      setCheckInCode(checkInCode)
+      setSuccess(true)
+    } catch (err: any) {
+      console.error("Error joining queue:", err)
+      setError(err.message || "Failed to join queue. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -92,118 +146,150 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Join Queue at {hospital.name}</DialogTitle>
+          <DialogTitle className="text-xl">Join Queue at {hospital?.name}</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
-          {/* Hospital Info */}
-          <div className="bg-slate-50 p-4 rounded-lg">
-            <div className="flex items-center gap-2 mb-2">
-              <MapPin className="w-4 h-4 text-slate-500" />
-              <span className="text-sm text-slate-600">{hospital.address}</span>
+        {success ? (
+          <div className="py-8 text-center space-y-4">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
+              <CheckCircle className="w-8 h-8 text-green-600" />
             </div>
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-2">
-                <Clock className="w-4 h-4 text-slate-500" />
-                <span className="font-semibold text-emerald-600">~{hospital.waitTime} min wait</span>
-              </div>
-              <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                Position #{Math.floor(Math.random() * 10) + 1}
-              </Badge>
-            </div>
+            <h3 className="text-xl font-bold">Successfully Joined Queue!</h3>
+            <p className="text-gray-600">Your check-in code is:</p>
+            <div className="bg-gray-100 p-3 rounded-md text-2xl font-mono font-bold tracking-wider">{checkInCode}</div>
+            <p className="text-sm text-gray-500">
+              Please arrive at the hospital within 15 minutes of being called. You'll receive SMS updates about your
+              queue status.
+            </p>
+            <Button onClick={onSuccess} className="mt-4 bg-emerald-500 hover:bg-emerald-600">
+              Close
+            </Button>
           </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Personal Information */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="fullName">Full Name *</Label>
-                <Input
-                  id="fullName"
-                  value={formData.fullName}
-                  onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                  required
-                />
+        ) : (
+          <div className="space-y-6">
+            {/* Hospital Info */}
+            <div className="bg-slate-50 p-4 rounded-lg">
+              <div className="flex items-center gap-2 mb-2">
+                <MapPin className="w-4 h-4 text-slate-500" />
+                <span className="text-sm text-slate-600">{hospital?.address}</span>
               </div>
-              <div>
-                <Label htmlFor="phoneNumber">Phone Number *</Label>
-                <Input
-                  id="phoneNumber"
-                  type="tel"
-                  value={formData.phoneNumber}
-                  onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
-                  required
-                />
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-slate-500" />
+                  <span className="font-semibold text-emerald-600">~{hospital?.wait_time || "--"} min wait</span>
+                </div>
+                <Badge className="bg-blue-50 text-blue-700 border-blue-200">
+                  Position #{Math.floor(Math.random() * 10) + 1}
+                </Badge>
               </div>
             </div>
 
-            <div>
-              <Label htmlFor="healthCardNumber">Health Card Number *</Label>
-              <Input
-                id="healthCardNumber"
-                value={formData.healthCardNumber}
-                onChange={(e) => setFormData({ ...formData, healthCardNumber: e.target.value })}
-                required
-              />
-            </div>
+            {error && (
+              <Alert variant="destructive">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
 
-            {/* Injury Information */}
-            <div>
-              <Label htmlFor="injuryType">Type of Injury/Condition *</Label>
-              <Select
-                value={formData.injuryType}
-                onValueChange={(value) => setFormData({ ...formData, injuryType: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select injury type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {injuryTypes.map((type) => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <Label htmlFor="injuryDescription">Description (Optional)</Label>
-              <Textarea
-                id="injuryDescription"
-                value={formData.injuryDescription}
-                onChange={(e) => setFormData({ ...formData, injuryDescription: e.target.value })}
-                placeholder="Provide additional details about your condition..."
-                rows={3}
-              />
-            </div>
-
-            {/* Important Notice */}
-            <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
-              <div className="flex gap-3">
-                <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div className="text-sm">
-                  <p className="font-medium text-amber-800 mb-1">Important:</p>
-                  <ul className="text-amber-700 space-y-1">
-                    <li>• You must arrive within 15 minutes of being called</li>
-                    <li>• Bring valid ID and health card</li>
-                    <li>• You'll receive SMS updates about your queue status</li>
-                  </ul>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {/* Personal Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="fullName">Full Name *</Label>
+                  <Input
+                    id="fullName"
+                    value={formData.fullName}
+                    onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="phoneNumber">Phone Number *</Label>
+                  <Input
+                    id="phoneNumber"
+                    type="tel"
+                    value={formData.phoneNumber}
+                    onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
+                    required
+                  />
                 </div>
               </div>
-            </div>
 
-            {/* Submit Button */}
-            <div className="flex gap-3 pt-4">
-              <Button type="button" variant="outline" onClick={onClose} className="flex-1">
-                Cancel
-              </Button>
-              <Button type="submit" disabled={loading} className="flex-1 bg-emerald-500 hover:bg-emerald-600">
-                {loading ? "Joining Queue..." : "Join Queue"}
-              </Button>
-            </div>
-          </form>
-        </div>
+              <div>
+                <Label htmlFor="healthCardNumber">Health Card Number *</Label>
+                <Input
+                  id="healthCardNumber"
+                  value={formData.healthCardNumber}
+                  onChange={(e) => setFormData({ ...formData, healthCardNumber: e.target.value })}
+                  required
+                />
+              </div>
+
+              {/* Injury Information */}
+              <div>
+                <Label htmlFor="injuryType">Type of Injury/Condition *</Label>
+                <Select
+                  value={formData.injuryType}
+                  onValueChange={(value) => setFormData({ ...formData, injuryType: value })}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select injury type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {injuryTypes.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="injuryDescription">Description (Optional)</Label>
+                <Textarea
+                  id="injuryDescription"
+                  value={formData.injuryDescription}
+                  onChange={(e) => setFormData({ ...formData, injuryDescription: e.target.value })}
+                  placeholder="Provide additional details about your condition..."
+                  rows={3}
+                />
+              </div>
+
+              {/* Important Notice */}
+              <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg">
+                <div className="flex gap-3">
+                  <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div className="text-sm">
+                    <p className="font-medium text-amber-800 mb-1">Important:</p>
+                    <ul className="text-amber-700 space-y-1">
+                      <li>• You must arrive within 15 minutes of being called</li>
+                      <li>• Bring valid ID and health card</li>
+                      <li>• You'll receive SMS updates about your queue status</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <div className="flex gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={onClose} className="flex-1">
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={loading || !hospitalId} className="flex-1 bg-emerald-500 hover:bg-emerald-600">
+                  {loading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Joining Queue...
+                    </>
+                  ) : (
+                    "Join Queue"
+                  )}
+                </Button>
+              </div>
+            </form>
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   )

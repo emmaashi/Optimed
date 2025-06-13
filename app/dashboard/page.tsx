@@ -13,7 +13,7 @@ import { SymptomChecker } from "@/components/symptom-checker"
 import { AppointmentBooking } from "@/components/appointment-booking"
 import { TelehealthModal } from "@/components/telehealth-modal"
 import { ProtectedRoute } from "@/components/protected-route"
-import { useAuth } from "@/components/auth-provider"
+import { useAuth } from "@/app/contexts/auth-provider"
 import { supabase } from "@/lib/supabase"
 
 function DashboardContent() {
