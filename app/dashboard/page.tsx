@@ -68,6 +68,10 @@ function DashboardContent() {
     }
   }
 
+  const handleStartAssessment = () => {
+    setActiveModal("symptom-checker")
+  }
+
   return (
     <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen w-full bg-slate-50">
@@ -76,7 +80,7 @@ function DashboardContent() {
           <DashboardHeader />
 
           <div className="flex-1 p-4 md:p-6 overflow-auto">
-            {/* <EmergencyBanner className="mb-4" /> */}
+            <EmergencyBanner className="mb-4" />
 
             {/* Quick Actions - Top Row */}
             <div className="mb-4 md:mb-6">
@@ -92,7 +96,7 @@ function DashboardContent() {
 
               {/* Right Column - Queue Management */}
               <div className="h-[400px] lg:h-[600px] overflow-auto">
-                <QueueManagement userId={user?.id} />
+                <QueueManagement userId={user?.id} onStartAssessment={handleStartAssessment} />
               </div>
             </div>
           </div>
