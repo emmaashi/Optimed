@@ -64,16 +64,11 @@ const navigationItems = [
 ]
 
 const supportItems = [
-  {
-    title: "Emergency Contacts",
-    url: "/emergency-contacts",
-    icon: Phone,
-  },
-  {
-    title: "Privacy & Security",
-    url: "/privacy-security",
-    icon: Shield,
-  },
+  // {
+  //   title: "Privacy & Security",
+  //   url: "/privacy-security",
+  //   icon: Shield,
+  // },
   {
     title: "Settings",
     url: "/settings",

@@ -82,19 +82,15 @@ function DashboardContent() {
           <div className="flex-1 p-4 md:p-6 overflow-auto">
             <EmergencyBanner className="mb-4" />
 
-            {/* Quick Actions - Top Row */}
             <div className="mb-4 md:mb-6">
               <QuickActions onActionClick={handleQuickAction} />
             </div>
 
-            {/* Main Content - Two Column Layout */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-              {/* Left Column - Map */}
               <div className="h-[400px] lg:h-[600px]">
                 <HospitalMap selectedHospital={selectedHospital} onHospitalSelect={setSelectedHospital} />
               </div>
 
-              {/* Right Column - Queue Management */}
               <div className="h-[400px] lg:h-[600px] overflow-auto">
                 <QueueManagement userId={user?.id} onStartAssessment={handleStartAssessment} />
               </div>
