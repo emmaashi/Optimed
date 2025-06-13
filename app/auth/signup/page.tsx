@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Checkbox } from "@/components/ui/checkbox"
-import { Heart, Mail, Lock, Eye, EyeOff, User, Phone, Loader2, CheckCircle } from "lucide-react"
+import { Heart, Mail, Lock, Eye, EyeOff, User, Phone, Loader2, CheckCircle, ArrowLeft } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 export default function SignupPage() {
@@ -70,8 +70,6 @@ export default function SignupPage() {
     setLoading(true)
 
     try {
-      console.log("Attempting signup with:", { email: formData.email, fullName: formData.fullName })
-
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -84,10 +82,7 @@ export default function SignupPage() {
         },
       })
 
-      console.log("Signup response:", { data, error })
-
       if (error) {
-        console.error("Signup error:", error)
         if (error.message.includes("User already registered")) {
           setError("An account with this email already exists. Please sign in instead.")
         } else if (error.message.includes("Email not confirmed")) {
@@ -99,13 +94,10 @@ export default function SignupPage() {
       }
 
       if (data.user) {
-        console.log("User created successfully:", data.user)
-        // Store email for potential resending
         localStorage.setItem("pendingConfirmationEmail", formData.email)
         setSuccess(true)
       }
     } catch (err) {
-      console.error("Unexpected error:", err)
       setError("An unexpected error occurred. Please try again.")
     } finally {
       setLoading(false)
@@ -136,7 +128,7 @@ export default function SignupPage() {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-emerald-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <Card className="shadow-xl border-0">
             <CardContent className="text-center py-8">
@@ -145,21 +137,15 @@ export default function SignupPage() {
               </div>
               <h2 className="text-xl font-bold text-slate-900 mb-3">Check your email</h2>
               <p className="text-slate-600 mb-6 text-sm">
-                We've sent a confirmation link to <strong>{formData.email}</strong>. Please click the link to verify
-                your account.
+                We've sent a confirmation link to <strong>{formData.email}</strong>. Please click the link to verify your account.
               </p>
               <Alert className="border-blue-200 bg-blue-50 mb-4">
                 <AlertDescription className="text-blue-700 text-sm">
-                  <strong>Important:</strong> The confirmation link expires in 24 hours. If you don't see the email,
-                  check your spam folder.
+                  <strong>Important:</strong> The confirmation link expires in 24 hours. If you don't see the email, check your spam folder.
                 </AlertDescription>
               </Alert>
               <div className="space-y-2">
-                <Button
-                  onClick={() => router.push("/auth/login")}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700"
-                  size="sm"
-                >
+                <Button onClick={() => router.push("/auth/login")} className="w-full bg-emerald-600 hover:bg-emerald-700" size="sm">
                   Go to Sign In
                 </Button>
                 <Button variant="outline" onClick={() => setSuccess(false)} className="w-full" size="sm">
@@ -174,25 +160,30 @@ export default function SignupPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-emerald-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Logo and Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-emerald-600 rounded-2xl mb-3">
-            <Heart className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Join Optimed</h1>
-          <p className="text-slate-600 text-sm">Create your account to get started</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-blue-100 to-emerald-50 flex flex-col">
+      <header className="container mx-auto px-4 py-6">
+        <div className="flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Heart className="h-6 w-6 text-emerald-600" />
+            <span className="text-xl font-bold">Optimed</span>
+          </Link>
+          <Link href="/" className="flex items-center gap-1 text-sm text-gray-600 hover:text-emerald-600">
+            <ArrowLeft className="h-4 w-4" />
+            Back to home
+          </Link>
         </div>
+      </header>
 
-        <Card className="shadow-xl border-0">
-          <CardHeader className="space-y-1 pb-4">
-            <CardTitle className="text-xl font-semibold text-center">Create Account</CardTitle>
-            <CardDescription className="text-center text-sm">
-              Enter your information to create your healthcare account
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
+      <main className="flex-1 flex items-center justify-center px-4">
+        <div className="w-full max-w-2xl">
+          <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
+            <CardHeader className="space-y-1 pb-4">
+              <CardTitle className="text-xl font-semibold text-center">Create Account</CardTitle>
+              <CardDescription className="text-center text-sm">
+                Enter your information to create your healthcare account
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
             {error && (
               <Alert className="border-red-200 bg-red-50">
                 <AlertDescription className="text-red-700 text-sm">{error}</AlertDescription>
@@ -399,8 +390,9 @@ export default function SignupPage() {
               </Link>
             </div>
           </CardContent>
-        </Card>
-      </div>
+          </Card>
+        </div>
+      </main>
     </div>
   )
 }
