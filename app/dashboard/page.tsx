@@ -25,9 +25,19 @@ function DashboardContent() {
     if (!user) return
 
     try {
+      const { data: queueCount, error: countError } = await supabase
+        .from("queue_entries")
+        .select("id", { count: "exact" })
+        .eq("hospital_id", hospitalId)
+        .eq("status", "waiting")
+
+      if (countError) throw countError
+
       const checkInCode = Math.random().toString(36).substring(2, 8).toUpperCase()
       const checkInDeadline = new Date()
       checkInDeadline.setHours(checkInDeadline.getHours() + 2)
+
+      const positionInQueue = (queueCount?.length || 0) + 1
 
       const { data, error } = await supabase.from("queue_entries").insert({
         user_id: user.id,
@@ -35,14 +45,14 @@ function DashboardContent() {
         injury_description: assessment.recommendedAction,
         severity_level: assessment.severity,
         estimated_wait_time: assessment.estimatedWaitTime,
-        position_in_queue: Math.floor(Math.random() * 10) + 1,
+        position_in_queue: positionInQueue,
         check_in_code: checkInCode,
         check_in_deadline: checkInDeadline.toISOString(),
         status: "waiting",
       })
 
       if (error) throw error
-      alert(`Successfully joined queue! Your check-in code is: ${checkInCode}`)
+      alert(`Successfully joined queue! Your check-in code is: ${checkInCode}. You are position #${positionInQueue} in line.`)
     } catch (error) {
       console.error("Error joining queue:", error)
       alert("Failed to join queue. Please try again.")
@@ -80,7 +90,6 @@ function DashboardContent() {
           <DashboardHeader />
 
           <div className="flex-1 p-4 md:p-6 overflow-auto">
-            {/* <EmergencyBanner className="mb-4" /> */}
 
             <div className="mb-4 md:mb-6">
               <QuickActions onActionClick={handleQuickAction} />

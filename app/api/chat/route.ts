@@ -1,12 +1,15 @@
-import { openai } from "@ai-sdk/openai"
+import { createOpenAI } from "@ai-sdk/openai"
 import { streamText } from "ai"
 import { NextResponse } from "next/server"
 
 export const maxDuration = 30
 
+const openai = createOpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+})
+
 export async function POST(req: Request) {
   try {
-    // Check if API key exists
     if (!process.env.OPENAI_API_KEY) {
       console.error("OPENAI_API_KEY not found")
       return new NextResponse("OpenAI API key not configured", { status: 500 })
@@ -57,15 +60,13 @@ Be empathetic, clear, and always emphasize that this is guidance only.`,
       messages,
     })
 
-    console.log("Streaming response created successfully")
-
-    const response = result.toDataStreamResponse()
-
-    response.headers.set("Access-Control-Allow-Origin", "*")
-    response.headers.set("Access-Control-Allow-Methods", "POST")
-    response.headers.set("Access-Control-Allow-Headers", "Content-Type")
-
-    return response
+    return result.toDataStreamResponse({
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+      }
+    })
   } catch (error) {
     console.error("Chat API Error:", error)
 
