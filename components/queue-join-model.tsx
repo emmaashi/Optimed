@@ -309,10 +309,9 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
                   type="submit"
                   disabled={loading}
                   className="flex-1 bg-emerald-500 hover:bg-emerald-600"
-                  onClick={(e) => {
+                  onClick={() => {
                     if (!hospitalId) {
                       console.warn("No hospital ID found, but allowing submission for testing")
-                      // You can set a default ID here if needed for testing
                       setHospitalId("00000000-0000-0000-0000-000000000000")
                     }
                   }}

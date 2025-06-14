@@ -33,8 +33,6 @@ export default function ForgotPasswordPage() {
       } else {
         setSuccess(true)
       }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.")
     } finally {
       setLoading(false)
     }

@@ -13,7 +13,7 @@ import { ProtectedRoute } from "@/components/protected-route"
 import type React from "react"
 
 function ProfileContent() {
-  const { user, userProfile, error: authError, updateProfile } = useAuth()
+  const { user, userProfile, updateProfile } = useAuth()
   const [loading, setLoading] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
   const [error, setError] = useState("")

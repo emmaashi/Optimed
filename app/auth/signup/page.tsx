@@ -97,8 +97,6 @@ export default function SignupPage() {
         localStorage.setItem("pendingConfirmationEmail", formData.email)
         setSuccess(true)
       }
-    } catch (err) {
-      setError("An unexpected error occurred. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -119,8 +117,6 @@ export default function SignupPage() {
       if (error) {
         setError(error.message)
       }
-    } catch (err) {
-      setError("Failed to sign up with Google. Please try again.")
     } finally {
       setLoading(false)
     }

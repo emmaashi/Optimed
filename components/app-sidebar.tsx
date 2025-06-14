@@ -23,8 +23,6 @@ import {
   Settings,
   Heart,
   FileText,
-  Phone,
-  Shield,
   LogOut,
 } from "lucide-react"
 import { useAuth } from "@/app/contexts/auth-provider"

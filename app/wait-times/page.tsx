@@ -12,7 +12,7 @@ import { useAuth } from "@/app/contexts/auth-provider"
 import { supabase } from "@/lib/supabase"
 
 export default function WaitTimesPage() {
-  const { user, userProfile } = useAuth()
+  const { user } = useAuth()
   const [selectedHospital, setSelectedHospital] = useState<any>(null)
   const [showJoinModal, setShowJoinModal] = useState(false)
   const [activeQueue, setActiveQueue] = useState<any>(null)
@@ -25,25 +25,20 @@ export default function WaitTimesPage() {
   }, [user])
 
   const checkActiveQueue = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("queue_entries")
-        .select(`
-          *,
-          hospitals (name, address)
-        `)
-        .eq("user_id", user?.id)
-        .in("status", ["waiting", "called"])
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .single()
+    const { data } = await supabase
+    .from("queue_entries")
+    .select(`
+        *,
+        hospitals (name, address)
+    `)
+    .eq("user_id", user?.id)
+    .in("status", ["waiting", "called"])
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .single()
 
-      if (data) {
-        setActiveQueue(data)
-      }
-    } catch (error) {
-      // No active queue found
-      setActiveQueue(null)
+    if (data) {
+    setActiveQueue(data)
     }
   }
 
@@ -81,7 +76,6 @@ export default function WaitTimesPage() {
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* Main Wait Times List */}
                   <div className="lg:col-span-2">
                     <WaitTimesList onJoinQueue={handleJoinQueue} activeQueueId={activeQueue?.id} />
                   </div>

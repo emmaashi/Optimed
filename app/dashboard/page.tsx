@@ -6,7 +6,6 @@ import { AppSidebar } from "@/components/app-sidebar"
 import { DashboardHeader } from "@/components/dashboard-header"
 import { HospitalMap } from "@/components/hospital-map"
 import { QuickActions } from "@/components/quick-actions"
-import { EmergencyBanner } from "@/components/emergency-banner"
 import { AIChatbot } from "@/components/ai-chatbot"
 import { QueueManagement } from "@/components/queue-management"
 import { SymptomChecker } from "@/components/symptom-checker"
@@ -29,7 +28,7 @@ function DashboardContent() {
       const checkInDeadline = new Date()
       checkInDeadline.setHours(checkInDeadline.getHours() + 2)
 
-      const { data, error } = await supabase.from("queue_entries").insert({
+      const { error } = await supabase.from("queue_entries").insert({
         user_id: user.id,
         hospital_id: hospitalId,
         injury_description: assessment.recommendedAction,
