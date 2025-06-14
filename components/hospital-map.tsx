@@ -74,7 +74,6 @@ export function HospitalMap({ selectedHospital, onHospitalSelect }: HospitalMapP
   const [mapError, setMapError] = useState<string | null>(null)
   const [isMapLoaded, setIsMapLoaded] = useState(false)
 
-  // Get Mapbox access token
   const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN
 
   const getStatusColor = (status: string) => {
@@ -183,11 +182,10 @@ export function HospitalMap({ selectedHospital, onHospitalSelect }: HospitalMapP
     mapboxgl.accessToken = mapboxToken
 
     try {
-      // Initialize map
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v12",
-        center: [-79.3832, 43.6532], // Toronto coordinates
+        center: [-79.3832, 43.6532],
         zoom: 11,
         attributionControl: false,
       })
@@ -331,13 +329,13 @@ export function HospitalMap({ selectedHospital, onHospitalSelect }: HospitalMapP
   return (
     <div className="relative h-full">
       <Card className="border-none shadow-sm h-full">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg font-semibold">
             <MapPin className="w-5 h-5 text-emerald-500" />
             Nearby Healthcare Facilities
           </CardTitle>
         </CardHeader>
-        <CardContent className="h-[calc(100%-80px)]">
+        <CardContent className="h-[calc(100%-72px)] pt-0">
           {mapError ? (
             <div className="h-full flex flex-col items-center justify-center bg-slate-50 rounded-lg">
               <AlertCircle className="w-12 h-12 text-amber-500 mb-4" />

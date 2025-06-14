@@ -42,6 +42,7 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
   const [success, setSuccess] = useState(false)
   const [checkInCode, setCheckInCode] = useState("")
   const [hospitalId, setHospitalId] = useState<string | null>(null)
+  const [currentQueuePosition, setCurrentQueuePosition] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     fullName: userProfile?.full_name || user?.user_metadata?.full_name || user?.email?.split("@")[0] || "",
     healthCardNumber: userProfile?.health_card_number || "",
@@ -109,6 +110,32 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
     fetchHospitalId()
   }, [hospital])
 
+  // Fetch current queue position when hospital ID is available
+  useEffect(() => {
+    const fetchCurrentQueuePosition = async () => {
+      if (!hospitalId) return
+
+      try {
+        const { data: queueCount, error } = await supabase
+          .from("queue_entries")
+          .select("id", { count: "exact" })
+          .eq("hospital_id", hospitalId)
+          .eq("status", "waiting")
+
+        if (error) {
+          console.error("Error fetching queue count:", error)
+        } else {
+          // Next position would be current count + 1
+          setCurrentQueuePosition((queueCount?.length || 0) + 1)
+        }
+      } catch (err) {
+        console.error("Error in fetchCurrentQueuePosition:", err)
+      }
+    }
+
+    fetchCurrentQueuePosition()
+  }, [hospitalId])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -124,9 +151,18 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
         throw new Error("Hospital information is missing. Please try again.")
       }
 
+      // Get current queue count for accurate position
+      const { data: queueCount, error: countError } = await supabase
+        .from("queue_entries")
+        .select("id", { count: "exact" })
+        .eq("hospital_id", hospitalId)
+        .eq("status", "waiting")
+
+      if (countError) throw countError
+
       const checkInCode = Math.random().toString(36).substring(2, 8).toUpperCase()
       const estimatedWaitTime = hospital.wait_time || 30 // Default to 30 if wait_time is not provided
-      const position = Math.floor(Math.random() * 10) + 1
+      const position = (queueCount?.length || 0) + 1 // Actual position based on current queue
 
       const checkInDeadline = new Date()
       checkInDeadline.setMinutes(checkInDeadline.getMinutes() + estimatedWaitTime + 15)
@@ -204,7 +240,7 @@ export function QueueJoinModal({ hospital, isOpen, onClose, onSuccess, prefilled
                   <span className="font-semibold text-emerald-600">~{hospital?.wait_time || "--"} min wait</span>
                 </div>
                 <Badge className="bg-blue-50 text-blue-700 border-blue-200">
-                  Position #{Math.floor(Math.random() * 10) + 1}
+                  Position #{currentQueuePosition || "--"}
                 </Badge>
               </div>
             </div>

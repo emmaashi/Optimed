@@ -64,7 +64,7 @@ export function WaitTimesCard({ selectedHospital }: WaitTimesCardProps) {
           Live Wait Times
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+     <CardContent className="space-y-2 p-3 pt-1">
         {waitTimes.map((hospital) => (
           <div
             key={hospital.id}
