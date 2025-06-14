@@ -14,8 +14,7 @@ export interface QueueEntry {
 
 export async function joinQueue(queueEntry: QueueEntry) {
   try {
-    // Validate required fields
-    const requiredFields = ["user_id", "hospital_id", "injury_description", "severity_level"]
+    const requiredFields: (keyof QueueEntry)[] = ["user_id", "hospital_id", "injury_description", "severity_level"]
 
     for (const field of requiredFields) {
       if (!queueEntry[field]) {
