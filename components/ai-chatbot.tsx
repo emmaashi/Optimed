@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { MessageCircle, Send, Bot, User, AlertTriangle, Clock, MapPin } from "lucide-react"
-import { useChat } from "ai/react"
+import { useCustomChat, Message } from "@/app/api/chat/hooks/useCustomChat"
 import { supabase } from "@/lib/supabase"
 
 interface InjuryAssessment {
@@ -28,17 +28,24 @@ export function AIChatbot({ userId, onQueueJoin }: AIChatbotProps) {
   const [selectedHospital, setSelectedHospital] = useState<string>("")
   const scrollAreaRef = useRef<HTMLDivElement>(null)
 
-  const { messages, input, handleInputChange, handleSubmit, isLoading, error } = useChat({
+  const { 
+    messages, 
+    input, 
+    handleInputChange, 
+    handleSubmit, 
+    isLoading, 
+    error 
+  } = useCustomChat({
     api: "/api/chat",
     initialMessages: [
       {
         id: "1",
         role: "assistant",
-        content:
-          "Hi! I'm your AI health assistant. I'm here to help assess your injury and find you the best care option. Can you tell me what happened and what symptoms you're experiencing?",
+        content: "Hi! I'm your AI health assistant. I'm here to help assess your injury and find you the best care option. Can you tell me what happened and what symptoms you're experiencing?",
+        timestamp: new Date()
       },
     ],
-    onFinish: async (message) => {
+    onFinish: async (message: Message) => {
       console.log("Chat finished with message:", message)
 
       // Save chat session to Supabase
@@ -58,7 +65,7 @@ export function AIChatbot({ userId, onQueueJoin }: AIChatbotProps) {
     },
   })
 
-  const saveChatSession = async (chatMessages: any[]) => {
+  const saveChatSession = async (chatMessages: Message[]) => {
     try {
       await supabase.from("chat_sessions").upsert({
         user_id: userId,
@@ -148,11 +155,18 @@ export function AIChatbot({ userId, onQueueJoin }: AIChatbotProps) {
             ×
           </Button>
         </div>
-        {error && <div className="text-xs text-red-600 bg-red-50 p-2 rounded">Error: {error.message}</div>}
+        {error && (
+          <div className="text-xs text-red-600 bg-red-50 p-2 rounded">
+            Error: {error.message}
+          </div>
+        )}
       </CardHeader>
 
       <CardContent className="flex-1 flex flex-col p-4 pt-0">
-        <ScrollArea className="flex-1 pr-4" ref={scrollAreaRef}>
+    <div
+      ref={scrollAreaRef}
+      className="flex-1 overflow-y-auto pr-2 scroll-smooth"
+    >
           <div className="space-y-4">
             {messages.map((message) => (
               <div
@@ -202,7 +216,7 @@ export function AIChatbot({ userId, onQueueJoin }: AIChatbotProps) {
               </div>
             )}
           </div>
-        </ScrollArea>
+          </div>
 
         {assessment && (
           <div className="mt-4 p-3 bg-slate-50 rounded-lg border">
@@ -212,7 +226,9 @@ export function AIChatbot({ userId, onQueueJoin }: AIChatbotProps) {
             </h4>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Badge className={getUrgencyColor(assessment.urgency)}>{assessment.urgency.toUpperCase()}</Badge>
+                <Badge className={getUrgencyColor(assessment.urgency)}>
+                  {assessment.urgency.toUpperCase()}
+                </Badge>
                 <span className="text-xs text-gray-600">Severity: {assessment.severity}/5</span>
               </div>
               <p className="text-xs text-gray-700">{assessment.recommendedAction}</p>
@@ -232,7 +248,11 @@ export function AIChatbot({ userId, onQueueJoin }: AIChatbotProps) {
                 <option value="st-michaels">St. Michael's Hospital</option>
               </select>
 
-              <Button onClick={handleJoinQueue} disabled={!selectedHospital} className="w-full mt-2 h-8 text-xs">
+              <Button 
+                onClick={handleJoinQueue} 
+                disabled={!selectedHospital} 
+                className="w-full mt-2 h-8 text-xs"
+              >
                 <MapPin className="w-3 h-3 mr-1" />
                 Join Queue
               </Button>
