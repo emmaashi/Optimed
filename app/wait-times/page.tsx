@@ -63,7 +63,7 @@ export default function WaitTimesPage() {
             <div className="flex-1 p-6">
               <div className="max-w-7xl mx-auto space-y-6">
                 {/* Header */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between pl-1.5">
                   <div>
                     <h1 className="text-2xl font-bold text-slate-900">Live Wait Times</h1>
                     <p className="text-slate-600">Find the shortest wait times at nearby hospitals</p>
