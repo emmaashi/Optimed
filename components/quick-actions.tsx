@@ -73,7 +73,7 @@ export function QuickActions({ onActionClick }: QuickActionsProps) {
   return (
     <>
       <Card className="border-none shadow-sm">
-        <CardHeader className="pb-2">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Heart className="w-5 h-5 text-emerald-500" />
             Quick Actions

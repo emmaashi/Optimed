@@ -165,7 +165,7 @@ export function QueueManagement({ userId, onStartAssessment }: QueueManagementPr
   if (!userId) {
     return (
       <Card className="h-full flex flex-col">
-        <CardHeader className="pb-6">
+        <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl font-semibold">
             <Clock className="w-6 h-6 text-emerald-500" />
             Your Queue Status
@@ -211,7 +211,7 @@ export function QueueManagement({ userId, onStartAssessment }: QueueManagementPr
   if (queueEntries.length === 0) {
     return (
       <Card className="h-full flex flex-col">
-        <CardHeader className="pb-6">
+        <CardHeader>
           <CardTitle className="flex items-center gap-3 text-xl font-semibold">
             <Clock className="w-6 h-6 text-emerald-500" />
             Your Queue Status
@@ -244,7 +244,7 @@ export function QueueManagement({ userId, onStartAssessment }: QueueManagementPr
 
   return (
     <Card className="h-full flex flex-col">
-      <CardHeader className="pb-6">
+      <CardHeader>
         <CardTitle className="flex items-center gap-3 text-xl font-semibold">
           <Clock className="w-6 h-6 text-emerald-500" />
           Your Queue Status

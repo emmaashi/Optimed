@@ -331,7 +331,7 @@ export function HospitalMap({ selectedHospital, onHospitalSelect }: HospitalMapP
   return (
     <div className="relative h-full">
       <Card className="border-none shadow-sm h-full">
-        <CardHeader className="pb-3">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg font-semibold">
             <MapPin className="w-5 h-5 text-emerald-500" />
             Nearby Healthcare Facilities
