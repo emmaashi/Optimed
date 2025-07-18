@@ -38,9 +38,6 @@ export default function HomePage() {
             <Link href="/hospitals" className="text-gray-700 hover:text-emerald-600 transition-colors">
               Hospitals
             </Link>
-            <Link href="/pricing" className="text-gray-700 hover:text-emerald-600 transition-colors">
-              Pricing
-            </Link>
             <Link href="/help" className="text-gray-700 hover:text-emerald-600 transition-colors">
               Help
             </Link>
@@ -283,7 +280,6 @@ export default function HomePage() {
         </div>
 
         <div className="mt-12 pt-8 border-t border-gray-200 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-sm text-gray-500">© 2025 Optimed. All rights reserved.</p>
           <div className="flex gap-4 mt-4 md:mt-0">
             <Link href="#" className="text-gray-400 hover:text-gray-500">
               <span className="sr-only">Twitter</span>

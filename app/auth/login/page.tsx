@@ -137,7 +137,7 @@ export default function LoginPage() {
       {/* Footer */}
       <footer className="container mx-auto px-4 py-6">
         <div className="text-center text-sm text-gray-500">
-          <p>© 2025 Optimed. All rights reserved.</p>
+          <p>© 2025 Optimed.</p>
         </div>
       </footer>
     </div>
