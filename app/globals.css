@@ -118,6 +118,21 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  /* Apple-inspired smooth transitions */
+  * {
+    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition-duration: 150ms;
+  }
+  
+  /* Better button hover states */
+  button:active {
+    transform: scale(0.98);
   }
 }
 

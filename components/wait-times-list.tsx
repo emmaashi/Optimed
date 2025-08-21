@@ -1,11 +1,9 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Input } from "@/components/ui/input"
-import { Clock, MapPin, Users, Search } from "lucide-react"
+import { Clock, MapPin, Search } from "lucide-react"
 
 interface Hospital {
   id: string
@@ -108,18 +106,7 @@ export function WaitTimesList({ onJoinQueue, activeQueueId }: WaitTimesListProps
     setFilteredHospitals(filtered)
   }, [searchTerm, sortBy])
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "low":
-        return "bg-emerald-50 text-emerald-700 border-emerald-200"
-      case "moderate":
-        return "bg-amber-50 text-amber-700 border-amber-200"
-      case "busy":
-        return "bg-red-50 text-red-700 border-red-200"
-      default:
-        return "bg-slate-50 text-slate-700 border-slate-200"
-    }
-  }
+
 
   const formatWaitTime = (minutes: number) => {
     if (minutes < 60) return `${minutes} min`
@@ -129,96 +116,108 @@ export function WaitTimesList({ onJoinQueue, activeQueueId }: WaitTimesListProps
   }
 
   return (
-    <div className="space-y-4 pl-1.5">
-      {/* Search and Filter */}
-          <div className="flex gap-4">
-            <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <Input
-                placeholder="Search hospitals or specialties..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Button
-                variant={sortBy === "waitTime" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("waitTime")}
-              >
-                <Clock className="w-4 h-4 mr-2" />
-                Wait Time
-              </Button>
-              <Button
-                variant={sortBy === "distance" ? "default" : "outline"}
-                size="sm"
-                onClick={() => setSortBy("distance")}
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                Distance
-              </Button>
-            </div>
+    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm h-full flex flex-col">
+      <div className="px-6 py-4 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900">Hospital Wait Times</h2>
+        <p className="text-sm text-gray-500 mt-1">Find the best option for your visit</p>
+      </div>
+      
+      <div className="p-6 flex-1 flex flex-col">
+        {/* Search and Filter */}
+        <div className="flex gap-3 mb-6">
+          <div className="flex-1 relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search hospitals or specialties..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 h-10 border-gray-200 rounded-xl bg-gray-50 border-0"
+            />
           </div>
+          <div className="flex gap-2">
+            <Button
+              variant={sortBy === "waitTime" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSortBy("waitTime")}
+              className={sortBy === "waitTime" ? "bg-emerald-500 hover:bg-emerald-600" : "border-gray-200 hover:bg-gray-50"}
+            >
+              <Clock className="w-4 h-4 mr-2" />
+              Wait Time
+            </Button>
+            <Button
+              variant={sortBy === "distance" ? "default" : "outline"}
+              size="sm"
+              onClick={() => setSortBy("distance")}
+              className={sortBy === "distance" ? "bg-emerald-500 hover:bg-emerald-600" : "border-gray-200 hover:bg-gray-50"}
+            >
+              <MapPin className="w-4 h-4 mr-2" />
+              Distance
+            </Button>
+          </div>
+        </div>
 
-      {/* Hospital List */}
-      <div className="space-y-3">
-        {filteredHospitals.map((hospital) => (
-          <Card key={hospital.id} className="hover:shadow-md transition-shadow">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <div className="flex items-start gap-4">
+        {/* Hospital List */}
+        <div className="flex-1 overflow-y-auto space-y-2">
+          {filteredHospitals.map((hospital) => (
+            <div key={hospital.id} className="group relative bg-white/60 backdrop-blur-sm border border-gray-200/50 rounded-2xl p-4 hover:bg-white/80 hover:border-gray-300/50 hover:shadow-lg transition-all duration-200">
+              {/* Subtle gradient overlay */}
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 to-gray-50/30 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+              
+              <div className="relative flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between mb-2">
                     <div className="flex-1">
-                      <h3 className="font-semibold text-slate-900 text-lg">{hospital.name}</h3>
-                      <div className="flex items-center gap-2 text-slate-600 mt-1">
-                        <MapPin className="w-4 h-4" />
-                        <span className="text-sm">{hospital.address}</span>
+                      <h3 className="font-semibold text-gray-900 text-base truncate">{hospital.name}</h3>
+                      <div className="flex items-center gap-1.5 text-gray-500 mt-0.5">
+                        <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                        <span className="text-sm truncate">{hospital.address}</span>
                         <span className="text-sm">• {hospital.distance} km</span>
                       </div>
-
-                      <div className="flex items-center gap-4 mt-3">
-                        <div className="flex items-center gap-2">
-                          <Clock className="w-4 h-4 text-slate-400" />
-                          <span className="font-semibold text-emerald-600 text-lg">
-                            {formatWaitTime(hospital.waitTime)}
-                          </span>
-                          <Badge className={getStatusColor(hospital.status)}>{hospital.status}</Badge>
+                    </div>
+                    <div className="flex items-center gap-2 ml-3">
+                      <div className="text-right">
+                        <div className="font-bold text-emerald-600 text-lg leading-none">
+                          {formatWaitTime(hospital.waitTime)}
                         </div>
-
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-slate-400" />
-                          <span className="text-sm text-slate-600">{hospital.currentQueue} in queue</span>
-                        </div>
+                        <div className="text-xs text-gray-500 mt-0.5">{hospital.currentQueue} in queue</div>
                       </div>
+                      <div className={`w-2 h-2 rounded-full ${
+                        hospital.status === 'low' ? 'bg-emerald-400' :
+                        hospital.status === 'moderate' ? 'bg-amber-400' : 'bg-red-400'
+                      }`}></div>
+                    </div>
+                  </div>
 
-                      <div className="flex flex-wrap gap-1 mt-3">
-                        {hospital.specialties.map((specialty) => (
-                          <Badge key={specialty} variant="outline" className="text-xs">
-                            {specialty}
-                          </Badge>
-                        ))}
-                      </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex flex-wrap gap-1">
+                      {hospital.specialties.slice(0, 3).map((specialty) => (
+                        <span key={specialty} className="text-xs text-gray-600 bg-gray-100/80 px-2 py-0.5 rounded-full">
+                          {specialty}
+                        </span>
+                      ))}
+                      {hospital.specialties.length > 3 && (
+                        <span className="text-xs text-gray-500">+{hospital.specialties.length - 3}</span>
+                      )}
                     </div>
 
-                    <div className="flex flex-col gap-2 min-w-[120px]">
+                    <div className="flex gap-2 ml-3">
                       <Button
                         onClick={() => onJoinQueue(hospital)}
                         disabled={activeQueueId !== undefined}
-                        className="bg-emerald-500 hover:bg-emerald-600"
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-medium px-3 py-1.5 h-auto rounded-full transition-all duration-200 hover:scale-105 disabled:opacity-50"
                       >
                         {activeQueueId ? "In Queue" : "Join Queue"}
                       </Button>
-                      <Button variant="outline" size="sm">
-                        Call Hospital
+                      <Button variant="outline" className="border-gray-200 hover:bg-gray-50 text-xs px-3 py-1.5 h-auto rounded-full">
+                        Call
                       </Button>
                     </div>
                   </div>
                 </div>
               </div>
-            </CardContent>
-          </Card>
-        ))}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

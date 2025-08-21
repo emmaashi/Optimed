@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from "react"
 import mapboxgl from "mapbox-gl"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { MapPin, Navigation, Clock, Phone, X, AlertCircle } from "lucide-react"
+import { Navigation, Clock, Phone, X, AlertCircle } from "lucide-react"
 import "mapbox-gl/dist/mapbox-gl.css"
 
 interface HospitalMapProps {
@@ -330,82 +329,76 @@ export function HospitalMap({ selectedHospital, onHospitalSelect }: HospitalMapP
 
   return (
     <div className="relative h-full">
-      <Card className="border-none shadow-sm h-full">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-lg font-semibold">
-            <MapPin className="w-5 h-5 text-emerald-500" />
-            Nearby Healthcare Facilities
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="h-[calc(100%-80px)]">
+          <div className="bg-white rounded-3xl h-full flex flex-col overflow-hidden shadow-sm border border-gray-100">
+      <div className="px-6 py-4 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900">Nearby Hospitals</h2>
+        <p className="text-sm text-gray-500 mt-1">Find the best healthcare facility for you</p>
+      </div>
+        <div className="flex-1 relative">
           {mapError ? (
-            <div className="h-full flex flex-col items-center justify-center bg-slate-50 rounded-lg">
+            <div className="h-full flex flex-col items-center justify-center bg-gray-50">
               <AlertCircle className="w-12 h-12 text-amber-500 mb-4" />
-              <p className="text-sm text-slate-600 text-center mb-4 max-w-md">{mapError}</p>
-              <div className="text-xs text-slate-500 mb-4">Using fallback map view</div>
+              <p className="text-sm text-gray-600 text-center mb-4 max-w-md">{mapError}</p>
+              <div className="text-xs text-gray-500 mb-4">Using fallback map view</div>
               <FallbackMap />
             </div>
           ) : (
             <>
-              <div ref={mapContainer} className="w-full h-full rounded-lg overflow-hidden" />
+              <div ref={mapContainer} className="w-full h-full" />
               {!isMapLoaded && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-50 rounded-lg">
+                <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
                   <div className="text-center">
                     <div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mx-auto mb-2"></div>
-                    <p className="text-sm text-slate-600">Loading map...</p>
+                    <p className="text-sm text-gray-600">Loading map...</p>
                   </div>
                 </div>
               )}
             </>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {/* Hospital Info Popup */}
       {selectedHospitalData && (
-        <div className="absolute top-4 right-4 bg-white p-4 rounded-lg shadow-lg border border-slate-100 min-w-[280px] z-10">
-          <div className="flex justify-between items-start mb-2">
-            <h4 className="font-semibold text-slate-900">{selectedHospitalData.name}</h4>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0 hover:bg-slate-100"
+        <div className="absolute top-20 right-6 bg-white p-6 rounded-2xl shadow-xl border border-gray-100 min-w-[320px] z-10">
+          <div className="flex justify-between items-start mb-3">
+            <h4 className="font-bold text-gray-900 text-lg">{selectedHospitalData.name}</h4>
+            <button
+              className="w-8 h-8 rounded-full hover:bg-gray-100 flex items-center justify-center transition-colors"
               onClick={() => {
                 setSelectedHospitalData(null)
                 onHospitalSelect("")
               }}
             >
               <X className="w-4 h-4" />
-            </Button>
+            </button>
           </div>
-          <p className="text-xs text-slate-500 mb-3">{selectedHospitalData.address}</p>
+          <p className="text-sm text-gray-500 mb-4">{selectedHospitalData.address}</p>
 
-          <div className="flex items-center gap-2 mb-3">
-            <Clock className="w-4 h-4 text-slate-400" />
-            <span className="text-sm text-slate-600">Wait time: {selectedHospitalData.waitTime}</span>
-            <Badge className={`text-xs ${getStatusBadge(selectedHospitalData.status)}`}>
+          <div className="flex items-center gap-3 mb-4">
+            <Clock className="w-5 h-5 text-gray-400" />
+            <span className="text-base text-gray-600">Wait time: {selectedHospitalData.waitTime}</span>
+            <Badge className={`text-sm px-3 py-1 ${getStatusBadge(selectedHospitalData.status)}`}>
               {selectedHospitalData.status}
             </Badge>
           </div>
 
-          <div className="text-xs text-slate-500 mb-3">Distance: {selectedHospitalData.distance}</div>
+          <div className="text-sm text-gray-500 mb-6">Distance: {selectedHospitalData.distance}</div>
 
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <Button
-              size="sm"
-              className="text-xs h-7 flex-1 bg-emerald-500 hover:bg-emerald-600"
+              className="flex-1 h-11 bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-xl"
               onClick={() => handleDirections(selectedHospitalData)}
             >
-              <Navigation className="w-3 h-3 mr-1" />
+              <Navigation className="w-4 h-4 mr-2" />
               Directions
             </Button>
             <Button
               variant="outline"
-              size="sm"
-              className="text-xs h-7 flex-1"
+              className="flex-1 h-11 border-gray-200 hover:bg-gray-50 font-medium rounded-xl"
               onClick={() => handleCall(selectedHospitalData.phone)}
             >
-              <Phone className="w-3 h-3 mr-1" />
+              <Phone className="w-4 h-4 mr-2" />
               Call
             </Button>
           </div>

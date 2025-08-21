@@ -56,38 +56,50 @@ export default function WaitTimesPage() {
   return (
     <ProtectedRoute>
       <SidebarProvider defaultOpen={true}>
-        <div className="flex min-h-screen w-full bg-slate-50">
+        <div className="flex min-h-screen w-full bg-white">
           <AppSidebar />
           <main className="flex-1 flex flex-col">
             <DashboardHeader />
-            <div className="flex-1 p-6">
-              <div className="max-w-7xl mx-auto space-y-6">
-                {/* Header */}
-                <div className="flex items-center justify-between pl-1.5">
+            
+            <div className="flex-1 flex flex-col">
+              {/* Header Bar */}
+              <div className="px-6 py-4 border-b border-gray-100">
+                <div className="flex items-center justify-between">
                   <div>
-                    <h1 className="text-2xl font-bold text-slate-900">Live Wait Times</h1>
-                    <p className="text-slate-600">Find the shortest wait times at nearby hospitals</p>
+                    <h1 className="text-xl font-bold text-gray-900">Live Wait Times</h1>
+                    <p className="text-sm text-gray-500 mt-1">Find the shortest wait times at nearby hospitals</p>
                   </div>
                   {activeQueue && (
-                    <div className="text-sm text-emerald-600 font-medium">
-                      ✓ You're currently in queue at {activeQueue.hospitals?.name}
+                    <div className="flex items-center gap-2 px-3 py-1 bg-emerald-50 rounded-full">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full"></div>
+                      <span className="text-sm text-emerald-700 font-medium">
+                        In queue at {activeQueue.hospitals?.name}
+                      </span>
                     </div>
                   )}
                 </div>
+              </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  <div className="lg:col-span-2">
-                    <WaitTimesList onJoinQueue={handleJoinQueue} activeQueueId={activeQueue?.id} />
-                  </div>
+              {/* Main Content - Apple-style layout */}
+              <div className="flex-1 p-6 flex gap-6">
+                {/* Hospital List - Takes up most of the screen */}
+                <div className="flex-1">
+                  <WaitTimesList onJoinQueue={handleJoinQueue} activeQueueId={activeQueue?.id} />
+                </div>
 
-                  {/* Active Queue Status */}
-                  <div>
-                    {activeQueue ? (
-                      <ActiveQueueCard queue={activeQueue} onUpdate={checkActiveQueue} />
-                    ) : (
-                      <div className="bg-white rounded-lg border border-slate-200 p-6 text-center">
-                        <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                          <svg className="w-8 h-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                {/* Active Queue Status - Compact sidebar */}
+                <div className="w-80 flex-shrink-0">
+                  {activeQueue ? (
+                    <ActiveQueueCard queue={activeQueue} onUpdate={checkActiveQueue} />
+                  ) : (
+                    <div className="bg-white rounded-3xl border border-gray-100 shadow-sm h-fit">
+                      <div className="px-6 py-4 border-b border-gray-100">
+                        <h2 className="text-xl font-bold text-gray-900">Queue Status</h2>
+                        <p className="text-sm text-gray-500 mt-1">Your active queue position</p>
+                      </div>
+                      <div className="p-6 text-center">
+                        <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                          <svg className="w-6 h-6 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
@@ -96,11 +108,11 @@ export default function WaitTimesPage() {
                             />
                           </svg>
                         </div>
-                        <h3 className="font-medium text-slate-900 mb-2">No Active Queue</h3>
-                        <p className="text-sm text-slate-500">Join a hospital queue to see your status here</p>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">No Active Queue</h3>
+                        <p className="text-sm text-gray-500">Join a hospital queue to see your status here</p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

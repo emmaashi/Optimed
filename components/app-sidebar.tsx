@@ -40,6 +40,11 @@ const navigationItems = [
     icon: Clock,
   },
   {
+    title: "Medical Records",
+    url: "/medical-records",
+    icon: FileText,
+  },
+  {
     title: "Symptom Checker",
     url: "/symptom-checker",
     icon: Stethoscope,
@@ -48,11 +53,6 @@ const navigationItems = [
     title: "Appointments",
     url: "/appointments",
     icon: Calendar,
-  },
-  {
-    title: "Medical Records",
-    url: "/medical-records",
-    icon: FileText,
   },
   {
     title: "Health Insights",
@@ -89,15 +89,15 @@ export function AppSidebar() {
   const healthCardNumber = user?.user_metadata?.health_card_number
 
   return (
-    <Sidebar className="border-r border-slate-200">
+    <Sidebar className="border-r border-gray-100 bg-gray-50/50">
       <SidebarHeader className="p-6">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-            <Heart className="w-5 h-5 text-white" />
+          <div className="w-10 h-10 bg-emerald-500 rounded-xl flex items-center justify-center">
+            <Heart className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-xl font-bold text-slate-900">Optimed</h1>
-            <p className="text-sm text-slate-500">Smart Healthcare Access</p>
+            <h1 className="text-2xl font-bold text-gray-900">Optimed</h1>
+            <p className="text-sm text-gray-500">Smart Healthcare Access</p>
           </div>
         </div>
       </SidebarHeader>
@@ -146,18 +146,22 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-6">
-        <div className="space-y-3">
-          <div className="flex items-center gap-3 p-3 bg-slate-100 rounded-lg">
-            <div className="w-8 h-8 bg-slate-300 rounded-full flex items-center justify-center">
-              <User className="w-4 h-4 text-slate-600" />
+        <div className="space-y-4">
+          <div className="flex items-center gap-3 p-4 bg-white rounded-2xl border border-gray-100">
+            <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
+              <User className="w-5 h-5 text-gray-600" />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-slate-900 truncate">{displayName}</p>
-              <p className="text-xs text-slate-500">{healthCardNumber ? `HC: ${healthCardNumber}` : "No HC on file"}</p>
+              <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
+              <p className="text-xs text-gray-500">{healthCardNumber ? `HC: ${healthCardNumber}` : "No HC on file"}</p>
             </div>
           </div>
 
-          <Button variant="outline" size="sm" onClick={handleSignOut} className="w-full justify-start">
+          <Button 
+            variant="outline" 
+            onClick={handleSignOut} 
+            className="w-full justify-start h-11 rounded-xl border-gray-200 hover:bg-gray-50 font-medium"
+          >
             <LogOut className="w-4 h-4 mr-2" />
             Sign Out
           </Button>

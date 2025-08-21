@@ -1,11 +1,10 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "./ui/progress"
-import { Clock, MapPin, Phone, Navigation, AlertTriangle, CheckCircle } from "lucide-react"
+import { MapPin, Phone, Navigation, AlertTriangle, CheckCircle } from "lucide-react"
 import { supabase } from "@/lib/supabase"
 
 interface ActiveQueueCardProps {
@@ -82,18 +81,16 @@ export function ActiveQueueCard({ queue, onUpdate }: ActiveQueueCardProps) {
   )
 
   return (
-    <Card className={`${isExpiringSoon ? "border-amber-300 bg-amber-50" : ""}`}>
-      <CardHeader className="pb-3">
-        <CardTitle className="flex items-center gap-2 text-lg">
-          <Clock className="w-5 h-5 text-emerald-500" />
-          Queue Status
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
+    <div className={`bg-white rounded-3xl border border-gray-100 shadow-sm ${isExpiringSoon ? "border-amber-300 bg-amber-50" : ""}`}>
+      <div className="px-6 py-4 border-b border-gray-100">
+        <h2 className="text-xl font-bold text-gray-900">Queue Status</h2>
+        <p className="text-sm text-gray-500 mt-1">Your active queue position</p>
+      </div>
+      <div className="p-6 space-y-4">
         {/* Hospital Info */}
         <div>
-          <h3 className="font-semibold text-slate-900">{queue.hospitals?.name}</h3>
-          <div className="flex items-center gap-2 text-slate-600 mt-1">
+          <h3 className="font-bold text-gray-900">{queue.hospitals?.name}</h3>
+          <div className="flex items-center gap-2 text-gray-600 mt-1">
             <MapPin className="w-3 h-3" />
             <span className="text-sm">{queue.hospitals?.address}</span>
           </div>
@@ -101,23 +98,23 @@ export function ActiveQueueCard({ queue, onUpdate }: ActiveQueueCardProps) {
 
         {/* Status Badge */}
         <div className="flex items-center gap-2">
-          <Badge className={getStatusColor(queue.status)}>
+          <Badge className={`${getStatusColor(queue.status)} text-xs px-2 py-1 rounded-full`}>
             {queue.status === "waiting" ? "In Queue" : "Called - Check In Required"}
           </Badge>
-          {queue.status === "called" && <Badge className="bg-red-50 text-red-700 border-red-200">Urgent</Badge>}
+          {queue.status === "called" && <Badge className="bg-red-50 text-red-700 border-red-200 text-xs px-2 py-1 rounded-full">Urgent</Badge>}
         </div>
 
         {/* Queue Position & Time */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-slate-600">Position in queue:</span>
-            <span className="font-semibold text-lg">#{queue.position_in_queue}</span>
+            <span className="text-sm text-gray-600">Position in queue:</span>
+            <span className="font-bold text-lg">#{queue.position_in_queue}</span>
           </div>
 
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-sm text-slate-600">Estimated wait:</span>
-              <span className="font-semibold text-emerald-600">{timeRemaining}</span>
+              <span className="text-sm text-gray-600">Estimated wait:</span>
+              <span className="font-bold text-emerald-600">{timeRemaining}</span>
             </div>
             <Progress value={progress} className="h-2" />
           </div>
@@ -125,7 +122,7 @@ export function ActiveQueueCard({ queue, onUpdate }: ActiveQueueCardProps) {
 
         {/* Arrival Deadline */}
         <div
-          className={`p-3 rounded-lg border ${isExpiringSoon ? "bg-amber-100 border-amber-300" : "bg-blue-50 border-blue-200"}`}
+          className={`p-3 rounded-xl border ${isExpiringSoon ? "bg-amber-100 border-amber-300" : "bg-blue-50 border-blue-200"}`}
         >
           <div className="flex items-center gap-2">
             {isExpiringSoon ? (
@@ -146,34 +143,34 @@ export function ActiveQueueCard({ queue, onUpdate }: ActiveQueueCardProps) {
 
         {/* Check-in Code (if called) */}
         {queue.status === "called" && (
-          <div className="bg-slate-100 p-3 rounded-lg">
-            <p className="text-sm text-slate-600 mb-1">Check-in Code:</p>
-            <p className="text-xl font-mono font-bold text-slate-900">{queue.check_in_code}</p>
+          <div className="bg-gray-100 p-3 rounded-xl">
+            <p className="text-sm text-gray-600 mb-1">Check-in Code:</p>
+            <p className="text-xl font-mono font-bold text-gray-900">{queue.check_in_code}</p>
           </div>
         )}
 
         {/* Action Buttons */}
         <div className="space-y-2">
           <div className="grid grid-cols-2 gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-gray-200 hover:bg-gray-50 rounded-xl">
               <Navigation className="w-3 h-3 mr-1" />
               Directions
             </Button>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="border-gray-200 hover:bg-gray-50 rounded-xl">
               <Phone className="w-3 h-3 mr-1" />
-              Call Hospital
+              Call
             </Button>
           </div>
           <Button
             variant="outline"
             size="sm"
             onClick={handleCancelQueue}
-            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50"
+            className="w-full text-red-600 hover:text-red-700 hover:bg-red-50 border-gray-200 rounded-xl"
           >
             Cancel Queue Position
           </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </div>
   )
 }
