@@ -5,17 +5,17 @@ Optimed is a full-stack healthcare platform that helps Canadians triage injuries
 
 <img width="1462" height="745" alt="Screenshot 2025-07-16 at 12 53 56 PM" src="https://github.com/user-attachments/assets/47e5a782-88f9-42df-8b9c-1d5586d4fe06" />
 
-## 🔑 Features
+## Features
 
-- 🤖 **AI Symptom Checker** — GPT-powered assistant to assess injury severity
-- 🗺️ **Live ER Wait Times** — Mapbox integration with nearby hospitals
-- ⏳ **Queue Booking** — Secure your spot, see countdown to your time
-- 🧾 **Patient Profile** — Store health card, phone, and condition info
-- 📞 **Telehealth & Emergency Routing** — Redirect based on urgency
+- **AI Symptom Checker** — GPT-powered assistant to assess injury severity
+- **Live ER Wait Times** — Mapbox integration with nearby hospitals
+- **Queue Booking** — Secure your spot, see countdown to your time
+- **Patient Profile** — Store health card, phone, and condition info
+- **Telehealth & Emergency Routing** — Redirect based on urgency
 
 ---
 
-## 🛠 Tech Stack
+## Tech Stack
 
 **Frontend:**  
 - React, TypeScript, Next.js (App Router)  
